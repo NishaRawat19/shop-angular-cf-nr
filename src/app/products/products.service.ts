@@ -12,12 +12,6 @@ import {ApiService} from '../core/api.service';
 })
 export class ProductsService extends ApiService {
   createNewProduct(product: Product): Observable<Product> {
-    if (!this.endpointEnabled('bff')) {
-      console.warn(
-        'Endpoint "bff" is disabled. To enable change your environment.ts config'
-      );
-      return EMPTY;
-    }
 
     const url = this.getUrl('bff', 'products');
     return this.http.post<Product>(url, product);
