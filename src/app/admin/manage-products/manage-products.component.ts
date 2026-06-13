@@ -67,6 +67,7 @@ export class ManageProductsComponent {
     }
 
     this.manageProductsService.uploadProductsCSV(selectedFile).subscribe(() => {
+      console.log('Insode uploadProductsCSV')
       this.selectedFile.set(undefined);
     });
   }
