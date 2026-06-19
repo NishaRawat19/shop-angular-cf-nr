@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, Observable } from 'rxjs';
+import { EMPTY, Observable, throwError } from 'rxjs';
 import { ApiService } from '../../core/api.service';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map, catchError } from 'rxjs/operators';
 
 interface PreSignedUrlResponse {
   url?: string;
@@ -39,7 +39,13 @@ export class ManageProductsService extends ApiService {
 
   private getPreSignedUrl(fileName: string): Observable<string> {
     const url = this.getUrl('import', 'import');
-    const authorizationToken = localStorage.getItem('authorization_token');
+    const authorization_token = localStorage.getItem('authorization_token');
+
+    console.log('=== Import API Request ===');
+    console.log('URL:', url);
+    console.log('File name:', fileName);
+    console.log('Authorization token from localStorage:', authorization_token);
+    console.log('Authorization header:', `Basic ${authorization_token}`);
 
     return this.http.get<PreSignedUrlResponse | string>(url, {
       params: {
@@ -47,9 +53,20 @@ export class ManageProductsService extends ApiService {
       },
       headers: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        'Authorization': `Basic ${authorizationToken}`,
+        'Authorization': `Basic ${authorization_token}`,
       },
     }).pipe(
+      catchError((error) => {
+        console.error('Import API Error:', error);
+
+        // Extract error message from API response
+        const errorMessage = error.error?.message || error.message || 'Unknown error';
+
+        // Show alert with the error message from API
+        alert(`Error: ${errorMessage}`);
+
+        return throwError(() => error);
+      }),
       map((response) => {
         console.log('API Response:', response);
         console.log('Response type:', typeof response);
